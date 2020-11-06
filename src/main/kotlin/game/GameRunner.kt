@@ -2,15 +2,14 @@ package game
 
 import drawing.*
 import helper.*
+import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Point
 import java.util.*
 import javax.swing.JFrame
 import kotlin.random.Random
 
-class GameConnector(
-    private val frame: JFrame,
-) :Movable {
+class GameConnector(private val frame: JFrame) {
     // Create Player One and Two Ships and KeyEvents
     private val playerOne: Ship = Ship(
         P1_NAME,
@@ -38,6 +37,7 @@ class GameConnector(
     )
 
     private val canvas: GameDrawCanvas = GameDrawCanvas(WINDOW_WIDTH, WINDOW_HEIGHT )
+    private val hud = GameHudCanvas(WINDOW_WIDTH, HUD_HEIGHT)
     private val keyListener: GameKeyListener
     private val moveTimerTask = MoveTimerTask()
     private val paintTimerTask = PaintTimerTask(::collectAndRepaint)
@@ -45,12 +45,21 @@ class GameConnector(
     private val timer = Timer()
     private val backgroundPixels : List<Pixel>
 
-
-
     init {
         // add Canvas to Frame
         canvas.background = Color.BLACK
-        frame.add(canvas)
+        hud.background = Color.LIGHT_GRAY
+        hud.labels = Pair(HudLabel(
+            playerOne.name,
+            P1_LINE_COLOR,
+            SHIELD_MAX_CHARGE
+        ), HudLabel(
+            playerTwo.name,
+            P2_LINE_COLOR,
+            SHIELD_MAX_CHARGE
+        ))
+        frame.add(hud, BorderLayout.NORTH)
+        frame.add(canvas, BorderLayout.SOUTH)
 
         // Create KeyListener and finish configuring frame
         keyListener = GameKeyListener(playerEvents)
@@ -67,18 +76,40 @@ class GameConnector(
         moveTimerTask.addElement(playerOne.cannon)
         moveTimerTask.addElement(playerTwo)
         moveTimerTask.addElement(playerTwo.cannon)
-        moveTimerTask.addElement(this)
         timer.scheduleAtFixedRate(animationTimerTask,1000, ANIMATION_TIMER_INTERVAL)
         animationTimerTask.addFunction(playerOne.cannon::switchAnimation)
         animationTimerTask.addFunction(playerTwo.cannon::switchAnimation)
         animationTimerTask.addFunction(playerOne.shield::switchAnimation)
         animationTimerTask.addFunction(playerTwo.shield::switchAnimation)
+
+        // Configure Targeting
+        playerOne.cannon.getTarget = acquireTarget(playerTwo)
+        playerOne.cannon.hitTarget = hitTarget(playerTwo)
+        playerTwo.cannon.getTarget = acquireTarget(playerOne)
+        playerTwo.cannon.hitTarget = hitTarget(playerOne)
+    }
+
+    // Returns a function that returns the given ships center and radius
+    private fun acquireTarget(ship: Ship): () -> Pair<Point, Int>{
+        return { Pair(ship.center, ship.radius)}
+    }
+
+    // Returns a function that returns the function triggering the other ships shields
+    private fun hitTarget(ship: Ship): () -> Unit {
+        return {
+            // ship.hit() takes a function that should be triggered when the shields are
+            // empty and thus the ship was destroyed. Function end() ends the game
+            ship.hit(::end)
+        }
     }
 
     private fun collectAndRepaint(){
         canvas.shapesToDraw = playerOne.collectShapes() + playerTwo.collectShapes() + backgroundPixels //+ playerOne.cannon.collectPixels()
         canvas.debugTest = collectDebugMessages()
         canvas.repaint()
+        hud.labels.first.currentShieldCharge = playerOne.shield.powerLeft
+        hud.labels.second.currentShieldCharge = playerTwo.shield.powerLeft
+        hud.repaint()
     }
 
     private fun collectDebugMessages(): List<String>{
@@ -86,7 +117,8 @@ class GameConnector(
             "P1 RC count: ${playerOne.cannon.rechargeCounter}",
             "P1 Shots: ${playerOne.cannon.shots.size}",
             "P1 Shield: ${playerOne.shield.active}",
-            "P1 Position: ${playerOne.centerToString()}"
+            "P2 Position: ${playerTwo.centerToString()}",
+            "P1 Targeting: ${playerOne.cannon.getTarget?.invoke()}"
         )
     }
 
@@ -103,31 +135,6 @@ class GameConnector(
     private fun end(playerName: String){
         println("$playerName was destroyed!!")
         timer.cancel()
-    }
-
-    // Connector added to Movables to perform collision checks
-    override fun move() {
-        fun checkCollision(p1: Point, p2: Point, d: Int): Boolean{
-            return (calculateDistance(p1, p2) <= d)
-        }
-        fun hit(player: Ship){
-            println("${player.name} was hit!!")
-            player.hit(::end)
-        }
-
-        val playerOneShots = playerOne.cannon.collectPositions()
-        playerOneShots.forEach {
-            if (checkCollision(it, playerTwo.center, playerTwo.radius)) {
-                hit(playerTwo)
-            }
-        }
-
-        val playerTwoShots = playerTwo.cannon.collectPositions()
-        playerTwoShots.forEach {
-            if (checkCollision(it, playerOne.center, playerOne.radius)) {
-                hit(playerOne)
-            }
-        }
     }
 }
 

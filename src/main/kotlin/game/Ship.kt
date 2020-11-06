@@ -10,7 +10,7 @@ import kotlin.math.sqrt
 
 class Ship(
     val name: String,
-    center: Point, //TODO Jannis Fragen: val hier definieren und private set machen
+    center: Point, //TODO Fragen: val hier definieren und private set machen
     private var vector: Vector,
     private val lineColor: Color,
     private val fillColor: Color,
@@ -101,7 +101,7 @@ class Ship(
     }
 
     private fun outOfScreen(){
-        // TODO Jannis fragen: wie kann man daraus when machen
+        // TODO fragen: wie kann man daraus when machen
         val boundA = SHIP_SCREEN_BOUND
         if (center.x >= WINDOW_WIDTH + radius - boundA){
             center.x = 0 - radius + boundA

@@ -52,6 +52,9 @@ class LaserCannon : Movable {
             charged = false
         }
     }
+    // TODO fragen: nachträglich Init ohne das die nullable sind?
+    var getTarget: (() -> Pair<Point, Int>)? = null
+    var hitTarget: ( () -> Unit )? = null
 
     fun switchAnimation(){
         animationState = animationState.next()
@@ -66,13 +69,24 @@ class LaserCannon : Movable {
         return shots.map { Pixel(currentColor, it.pos, LASER_SHOT_SIZE) }
     }
 
-    fun collectPositions(): List<Point>{
-        return shots.map{Point(it.pos)}
-    }
 
     override fun move() {
         shots.forEach { it.move() }
         shots.removeIf { it.outOfBounds() }
+        fun checkCollision(p1: Point, p2: Point, d: Int): Boolean{
+            return (calculateDistance(p1, p2) <= d)
+        }
+        // Gets stats of the other ship
+        val target = getTarget?.invoke()
+        // target is nullable, therefore check required
+        if (target != null){
+            // checks collision, if true is returned, hit target function with the other ship is invoked
+            if (shots.removeIf {
+                    checkCollision(it.pos, target.first, target.second)}
+                    ){
+                hitTarget?.invoke()
+                }
+            }
         rechargeCounter++
         if (rechargeCounter >= LASER_RECHARGE_TIME){
             rechargeCounter = 0

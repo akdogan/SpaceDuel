@@ -10,9 +10,8 @@ const val WINDOW_WIDTH = 1080
 const val PAINT_TIMER_INTERVAL = 5L // Every 20ms -> 50 FPS
 const val MOVE_TIMER_INTERVAL = 50L
 const val ANIMATION_TIMER_INTERVAL = 200L
-const val DEBUG = true
-const val RELATIVE_START_X = 100
-const val RELATIVE_START_Y = 200
+const val DEBUG = false
+
 
 // SHIP CONFIGURATION
 // Determines the size of the ship. Value is the length from center to tip
@@ -20,9 +19,11 @@ const val SHIP_SIZE = 60
 // amount in degree to turn on each turnTimerAction
 const val SHIP_TURN_AMOUNT = 10.0
 // relative to ship vector length
-const val SHIP_INITIAL_SPEED = 0.4
+const val SHIP_INITIAL_SPEED = 0.3
 // buffer for the ship dissappearing from one side and reappearing on the other
 const val SHIP_SCREEN_BOUND = 25
+const val RELATIVE_START_X = 100
+const val RELATIVE_START_Y = 200
 
 // LASER AND SHIELDS
 val LASER_COLOR_ONE: Color = Color.YELLOW
@@ -76,3 +77,6 @@ const val AMOUNT_OF_STARS = 50
 val STAR_COLOR: Color = Color.WHITE
 const val STAR_SIZE = 4
 
+// HUD
+const val HUD_HEIGHT = 100
+const val SIDE_MARGIN = 30
