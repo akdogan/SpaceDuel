@@ -43,7 +43,7 @@ class GameConnector(private val frame: JFrame) {
     private val paintTimerTask = PaintTimerTask(::collectAndRepaint)
     private val animationTimerTask = AnimationTimerTask()
     private val timer = Timer()
-    private val backgroundPixels : List<Pixel>
+    private val backgroundStars = BackgroundStars()
 
     init {
         // add Canvas to Frame
@@ -66,8 +66,6 @@ class GameConnector(private val frame: JFrame) {
         frame.addKeyListener(keyListener)
         frame.pack()
 
-        // Create Background field
-        backgroundPixels = createBackgroundStars()
 
         // Configure Timers
         timer.scheduleAtFixedRate(paintTimerTask, 500, PAINT_TIMER_INTERVAL)
@@ -76,6 +74,7 @@ class GameConnector(private val frame: JFrame) {
         moveTimerTask.addElement(playerOne.cannon)
         moveTimerTask.addElement(playerTwo)
         moveTimerTask.addElement(playerTwo.cannon)
+        moveTimerTask.addElement(backgroundStars)
         timer.scheduleAtFixedRate(animationTimerTask,1000, ANIMATION_TIMER_INTERVAL)
         animationTimerTask.addFunction(playerOne.cannon::switchAnimation)
         animationTimerTask.addFunction(playerTwo.cannon::switchAnimation)
@@ -104,7 +103,7 @@ class GameConnector(private val frame: JFrame) {
     }
 
     private fun collectAndRepaint(){
-        canvas.shapesToDraw = playerOne.collectShapes() + playerTwo.collectShapes() + backgroundPixels //+ playerOne.cannon.collectPixels()
+        canvas.shapesToDraw = playerOne.collectShapes() + playerTwo.collectShapes() + backgroundStars.collectShapes() //+ playerOne.cannon.collectPixels()
         canvas.debugTest = collectDebugMessages()
         canvas.repaint()
         hud.labels.first.currentShieldCharge = playerOne.shield.powerLeft
@@ -122,15 +121,6 @@ class GameConnector(private val frame: JFrame) {
         )
     }
 
-    private fun createBackgroundStars(): List<Pixel>{
-        val list = mutableListOf<Pixel>()
-        for ( i in 0..AMOUNT_OF_STARS){
-            val x = Random.nextInt(WINDOW_WIDTH - 20) + 10
-            val y = Random.nextInt(WINDOW_HEIGHT - 20) + 10
-            list.add(Pixel(STAR_COLOR, Point(x,y), STAR_SIZE))
-        }
-        return list
-    }
 
     private fun end(playerName: String){
         println("$playerName was destroyed!!")

@@ -33,7 +33,7 @@ const val LASER_SHOT_SIZE = 6
 // number of cycles of the move timer until another shot is fired
 const val LASER_RECHARGE_TIME = 8
 const val LASER_SPEED = 0.8
-const val SHIELD_MAX_CHARGE = 6
+const val SHIELD_MAX_CHARGE = 10
 // number of cycles of the move timer the shields are visible
 const val SHIELD_VISIBLE_TIME = 5
 
@@ -76,6 +76,7 @@ const val P2_FIRE = 38
 const val AMOUNT_OF_STARS = 50
 val STAR_COLOR: Color = Color.WHITE
 const val STAR_SIZE = 4
+const val STAR_SPEED = 10
 
 // HUD
 const val HUD_HEIGHT = 100
