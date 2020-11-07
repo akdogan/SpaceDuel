@@ -1,6 +1,7 @@
 package game
 
 import java.util.*
+import kotlin.reflect.KFunction1
 
 interface Movable {
     fun move()
@@ -9,14 +10,19 @@ interface Movable {
 
 class MoveTimerTask(
     private val movables : MutableList<Movable> = mutableListOf(),
+    private var movablesToAdd : MutableList<Movable> = mutableListOf()
 
     ) : TimerTask(){
     override fun run() {
+        if (movablesToAdd.isNotEmpty()){
+            movables.addAll(movablesToAdd)
+            movablesToAdd.clear()
+        }
         movables.forEach { it.move() }
     }
 
     fun addElement(m: Movable){
-        movables.add(m)
+        movablesToAdd.add(m)
     }
 
 }
@@ -41,6 +47,22 @@ class AnimationTimerTask(
 
     fun addFunction(function: () -> Unit ){
         functionList.add(function)
+    }
+}
+
+class DelayedExecution<T>(
+        // TODO Fragen: kann man statt dem generischen Parameter T eine Funktion nehmen mit Any Paramter?
+        private val returnFunction: (T) -> Any,
+        private val maxCycles: Int,
+        private val arg: T
+) : Movable{
+    private var counter = 0
+
+    override fun move() {
+        counter++
+        if (counter >= maxCycles){
+            returnFunction.invoke(arg)
+        }
     }
 }
 

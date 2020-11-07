@@ -119,17 +119,22 @@ class GameConnector(frame: JFrame) {
             "P1 Targeting: ${playerOne.cannon.getTarget?.invoke()}"
         )
     }
-
-
+    
     private fun triggerEndAnimation(destroyedPlayerName: String, winnerName:String, explosion: Explosion){
-        println("$destroyedPlayerName was destroyed!!")
-        println("$winnerName has won")
         animationTimerTask.addFunction { explosion.switchAnimation() }
-        //timer.cancel()
-        // remove P2 Keys from keylistener
         keyListener.removeEventsByPlayerName(destroyedPlayerName)
-        //TODO
-        // Create a timerTask (maybe movable) that runs x times and then triggers the game is done function
+        moveTimerTask.addElement(DelayedExecution(
+                ::endGame,
+                25,
+                Pair(destroyedPlayerName, winnerName)
+        ))
+
+    }
+
+    private fun endGame( names: Pair<String, String>){
+        timer.cancel()
+        println("${names.first} was destroyed!!")
+        println("${names.second} has won")
     }
 
 
