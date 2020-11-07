@@ -21,10 +21,16 @@ class GameDrawCanvas(
         fun drawShipTriangle(element: ShipTriangle){
             g.fillPolygon(element.polygon)
         }
-        fun drawShipShields(element: ShieldOutline){
+        fun drawShipCircle(element: ShipCircle){
             val g2 = g as Graphics2D
-            g2.stroke  = BasicStroke(5F)
-            g2.drawOval(element.pos.x, element.pos.y, element.size, element.size)
+            if (element.outline){
+                g2.stroke  = BasicStroke(5F)
+                g2.drawOval(element.pos.x, element.pos.y, element.size, element.size)
+            }
+            else {
+                g.fillOval(element.pos.x, element.pos.y, element.size, element.size)
+            }
+
         }
         fun drawShipOutLine(element: ShipOutLine){
             val g2 = g as Graphics2D
@@ -43,7 +49,7 @@ class GameDrawCanvas(
             g.color = shape.color
             when (shape) {
                 is ShipTriangle -> drawShipTriangle(shape)
-                is ShieldOutline -> drawShipShields(shape)
+                is ShipCircle -> drawShipCircle(shape)
                 is ShipOutLine -> drawShipOutLine(shape)
                 is Pixel -> drawPixel(shape)
             }
@@ -61,7 +67,7 @@ class GameDrawCanvas(
     }
 
     override fun getPreferredSize(): Dimension {
-        return Dimension(myHeight, myWidth);
+        return Dimension(myHeight, myWidth)
     }
 
 }

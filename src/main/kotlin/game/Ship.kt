@@ -32,6 +32,8 @@ class Ship(
     var firing = false
     val cannon = LaserCannon()
     val shield = Shield(shieldColors)
+    var exploding = false
+    val explosion = Explosion()
 
 
     init {
@@ -57,24 +59,34 @@ class Ship(
     }
 
     fun collectShapes(): List<GameShapes>{
-        val poly = Polygon()
-        poly.addPoint(leftWingTip.x, leftWingTip.y)
-        poly.addPoint(rear.x, rear.y)
-        poly.addPoint(rightWingTip.x, rightWingTip.y)
-        poly.addPoint(tip.x, tip.y)
-        val shapeList = mutableListOf(
-            ShipTriangle(fillColor, poly),
-            ShipOutLine(lineColor, poly, HelperLine(rear, tip)),
-        )
-        if (shield.active){
-            val shieldOutline = ShieldOutline(
-                shield.getCurrentShieldColor(),
-                Point(center.x - radius, center.y - radius),
-                2 * radius
-            )
-            shapeList.add(shieldOutline)
+        val shapeList = mutableListOf<GameShapes>()
+        if (!explosion.running) {
+            val poly = Polygon()
+            poly.addPoint(leftWingTip.x, leftWingTip.y)
+            poly.addPoint(rear.x, rear.y)
+            poly.addPoint(rightWingTip.x, rightWingTip.y)
+            poly.addPoint(tip.x, tip.y)
+            shapeList.add(ShipTriangle(fillColor, poly))
+            shapeList.add(ShipOutLine(lineColor, poly, HelperLine(rear, tip)))
+            if (shield.active){
+                shapeList.add(ShipCircle(
+                    shield.getCurrentShieldColor(),
+                    Point(center.x - radius, center.y - radius),
+                    2 * radius,
+                    true
+                ))
+            }
+            shapeList.addAll(cannon.collectPixels())
+
         }
-        shapeList.addAll(cannon.collectPixels())
+        else {
+            shapeList.add(ShipCircle(
+                explosion.getCurrentColor(),
+                Point(center.x - radius, center.y - radius),
+                2 * radius,
+                false
+            ))
+        }
         return shapeList
     }
 
@@ -122,9 +134,11 @@ class Ship(
         cannon.fire(Point(tip), vector.multiply(LASER_SPEED))
     }
 
-    fun hit(end: (playerName: String) -> Unit){
+    fun hit(triggerEndAnimation: (playerName: String, enemyName: String, explosion: Explosion) -> Unit){
         if (shield.hit()){
-            end.invoke(name)
+            explosion.running = true
+            triggerEndAnimation.invoke(name, cannon.getTarget?.invoke()?.third?: "", explosion)
+            exploding = true
         }
     }
 

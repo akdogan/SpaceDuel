@@ -7,9 +7,8 @@ import java.awt.Color
 import java.awt.Point
 import java.util.*
 import javax.swing.JFrame
-import kotlin.random.Random
 
-class GameConnector(private val frame: JFrame) {
+class GameConnector(frame: JFrame) {
     // Create Player One and Two Ships and KeyEvents
     private val playerOne: Ship = Ship(
         P1_NAME,
@@ -28,12 +27,12 @@ class GameConnector(private val frame: JFrame) {
         P2_SHIELD_COLORS
     )
     private val playerEvents: List<GameKeyEvent> = listOf(
-        GameKeyEvent(P1_RIGHT, {playerOne.turningClock = true}, {playerOne.turningClock = false}),
-        GameKeyEvent(P1_LEFT, {playerOne.turningCounterClock = true}, {playerOne.turningCounterClock = false}),
-        GameKeyEvent(P1_FIRE, {playerOne.firing = true}, {playerOne.firing = false}),
-        GameKeyEvent(P2_RIGHT, {playerTwo.turningClock = true}, {playerTwo.turningClock = false}),
-        GameKeyEvent(P2_LEFT, {playerTwo.turningCounterClock = true}, {playerTwo.turningCounterClock = false}),
-        GameKeyEvent(P2_FIRE, {playerTwo.firing = true}, {playerTwo.firing = false})
+        GameKeyEvent(P1_NAME, P1_RIGHT, {playerOne.turningClock = true}, {playerOne.turningClock = false}),
+        GameKeyEvent(P1_NAME, P1_LEFT, {playerOne.turningCounterClock = true}, {playerOne.turningCounterClock = false}),
+        GameKeyEvent(P1_NAME, P1_FIRE, {playerOne.firing = true}, {playerOne.firing = false}),
+        GameKeyEvent(P2_NAME, P2_RIGHT, {playerTwo.turningClock = true}, {playerTwo.turningClock = false}),
+        GameKeyEvent(P2_NAME, P2_LEFT, {playerTwo.turningCounterClock = true}, {playerTwo.turningCounterClock = false}),
+        GameKeyEvent(P2_NAME, P2_FIRE, {playerTwo.firing = true}, {playerTwo.firing = false})
     )
 
     private val canvas: GameDrawCanvas = GameDrawCanvas(WINDOW_WIDTH, WINDOW_HEIGHT )
@@ -62,7 +61,7 @@ class GameConnector(private val frame: JFrame) {
         frame.add(canvas, BorderLayout.SOUTH)
 
         // Create KeyListener and finish configuring frame
-        keyListener = GameKeyListener(playerEvents)
+        keyListener = GameKeyListener(playerEvents.toMutableList())
         frame.addKeyListener(keyListener)
         frame.pack()
 
@@ -89,21 +88,21 @@ class GameConnector(private val frame: JFrame) {
     }
 
     // Returns a function that returns the given ships center and radius
-    private fun acquireTarget(ship: Ship): () -> Pair<Point, Int>{
-        return { Pair(ship.center, ship.radius)}
+    private fun acquireTarget(ship: Ship): () -> Triple<Point, Int, String>{
+        return { Triple(ship.center, ship.radius, ship.name)}
     }
 
     // Returns a function that returns the function triggering the other ships shields
     private fun hitTarget(ship: Ship): () -> Unit {
         return {
             // ship.hit() takes a function that should be triggered when the shields are
-            // empty and thus the ship was destroyed. Function end() ends the game
-            ship.hit(::end)
+            // empty and thus the ship was destroyed. Function triggerEndAnimation() ends the game
+            ship.hit(::triggerEndAnimation)
         }
     }
 
     private fun collectAndRepaint(){
-        canvas.shapesToDraw = playerOne.collectShapes() + playerTwo.collectShapes() + backgroundStars.collectShapes() //+ playerOne.cannon.collectPixels()
+        canvas.shapesToDraw = backgroundStars.collectShapes() + playerOne.collectShapes() + playerTwo.collectShapes()
         canvas.debugTest = collectDebugMessages()
         canvas.repaint()
         hud.labels.first.currentShieldCharge = playerOne.shield.powerLeft
@@ -122,10 +121,18 @@ class GameConnector(private val frame: JFrame) {
     }
 
 
-    private fun end(playerName: String){
-        println("$playerName was destroyed!!")
-        timer.cancel()
+    private fun triggerEndAnimation(destroyedPlayerName: String, winnerName:String, explosion: Explosion){
+        println("$destroyedPlayerName was destroyed!!")
+        println("$winnerName has won")
+        animationTimerTask.addFunction { explosion.switchAnimation() }
+        //timer.cancel()
+        // remove P2 Keys from keylistener
+        keyListener.removeEventsByPlayerName(destroyedPlayerName)
+        //TODO
+        // Create a timerTask (maybe movable) that runs x times and then triggers the game is done function
     }
+
+
 }
 
 

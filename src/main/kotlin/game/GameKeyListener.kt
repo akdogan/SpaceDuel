@@ -4,7 +4,7 @@ import helper.logger
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
 
-class GameKeyListener(private val gameKeyList: List<GameKeyEvent>) : KeyListener {
+class GameKeyListener(private val gameKeyList: MutableList<GameKeyEvent>) : KeyListener {
     override fun keyTyped(e: KeyEvent?) {
 
     }
@@ -21,9 +21,14 @@ class GameKeyListener(private val gameKeyList: List<GameKeyEvent>) : KeyListener
         val k = gameKeyList.find{ it.gameKeyCode == e?.keyCode}
         k?.releaseGameAction?.invoke()
     }
+
+    fun removeEventsByPlayerName(name: String){
+        gameKeyList.removeIf { it.playerName == name }
+    }
 }
 
 class GameKeyEvent(
+    val playerName: String,
     val gameKeyCode: Int,
     val pressGameAction: () -> Unit,
     val releaseGameAction: () -> Unit

@@ -11,33 +11,26 @@ abstract val color: Color
 class ShipTriangle(
     override val color: Color,
     val polygon: Polygon,
-) : GameShapes(){
+) : GameShapes()
 
-}
-
-class ShieldOutline(
+class ShipCircle(
     override val color: Color,
     val pos: Point,
-    val size: Int
-) : GameShapes(){
-
-}
+    val size: Int,
+    val outline: Boolean
+) : GameShapes()
 
 class ShipOutLine(
     override val color: Color,
     val polygon: Polygon,
     val line: HelperLine,
-) : GameShapes() {
-
-}
+) : GameShapes()
 
 class Pixel(
     override val color: Color,
     val p: Point,
     val size: Int = 1
-) : GameShapes() {
-
-}
+) : GameShapes()
 
 class HelperLine(var p1: Point, var p2: Point){
 

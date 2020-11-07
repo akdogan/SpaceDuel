@@ -22,8 +22,7 @@ class Shield(private val shieldColor: List<Color>) {
     }
 
     fun getCurrentShieldColor(): Color{
-        val i = activeCounter % shieldColor.size
-        return shieldColor[i]
+        return shieldColor[activeCounter % shieldColor.size]
     }
 
     fun switchAnimation() {
@@ -53,7 +52,7 @@ class LaserCannon : Movable {
         }
     }
     // TODO fragen: nachträglich Init ohne das die nullable sind?
-    var getTarget: (() -> Pair<Point, Int>)? = null
+    var getTarget: (() -> Triple<Point, Int, String>)? = null
     var hitTarget: ( () -> Unit )? = null
 
     fun switchAnimation(){
@@ -106,5 +105,22 @@ class LaserShot(
 
     fun outOfBounds(): Boolean{
         return (pos.x > WINDOW_WIDTH || pos.x < 0 || pos.y > WINDOW_HEIGHT || pos.y < 0)
+    }
+}
+
+// TODO Work in Progress -> Animation and call of final endgame function
+class Explosion() {
+    var animationCounter = 0
+    var running = false
+
+
+    fun switchAnimation() {
+        if (running){
+            animationCounter++
+        }
+    }
+
+    fun getCurrentColor(): Color {
+        return EXPLOSION_COLORS[animationCounter % EXPLOSION_COLORS.size]
     }
 }
