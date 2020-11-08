@@ -26,16 +26,8 @@ class MoveTimerTask(
     }
 
 }
-
-class PaintTimerTask(
-    private val repainter: () -> Unit
-) : TimerTask(){
-    override fun run() {
-        repainter.invoke()
-    }
-
-}
-
+// TODO Fragen: Zwei Konzepte, Interface implementieren (movable) oder Funktion
+//  direkt zum ausführen geben (Animation Timer), was ist besser?
 class AnimationTimerTask(
 
 ) : TimerTask(){
@@ -48,6 +40,15 @@ class AnimationTimerTask(
     fun addFunction(function: () -> Unit ){
         functionList.add(function)
     }
+}
+
+class PaintTimerTask(
+    private val repainter: () -> Unit
+) : TimerTask(){
+    override fun run() {
+        repainter.invoke()
+    }
+
 }
 
 class DelayedExecution<T>(

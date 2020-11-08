@@ -16,8 +16,6 @@ class GameDrawCanvas(
 
 
     override fun paintComponent(g: Graphics) {
-        val ships : List<ShipOutLine> = shapesToDraw.filterIsInstance<ShipOutLine>()
-
         fun drawShipTriangle(element: ShipTriangle){
             g.fillPolygon(element.polygon)
         }
@@ -39,9 +37,7 @@ class GameDrawCanvas(
             g2.drawPolygon(element.polygon)
         }
         fun drawPixel(element: Pixel){
-            if (ships.none { it.polygon.contains(element.p)}) {
-                g.fillOval(element.p.x, element.p.y, element.size, element.size)
-            }
+            g.fillOval(element.p.x, element.p.y, element.size, element.size)
         }
         super.paintComponent(g)
 

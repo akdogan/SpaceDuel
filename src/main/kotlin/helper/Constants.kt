@@ -9,7 +9,7 @@ const val WINDOW_HEIGHT = 720
 const val WINDOW_WIDTH = 1080
 const val PAINT_TIMER_INTERVAL = 5L // Every 20ms -> 50 FPS
 const val MOVE_TIMER_INTERVAL = 50L
-const val ANIMATION_TIMER_INTERVAL = 200L
+const val ANIMATION_TIMER_INTERVAL = 100L
 const val DEBUG = false
 
 
@@ -35,7 +35,7 @@ const val LASER_RECHARGE_TIME = 8
 const val LASER_SPEED = 0.8
 const val SHIELD_MAX_CHARGE = 6
 // number of cycles of the move timer the shields are visible
-const val SHIELD_VISIBLE_TIME = 5
+const val SHIELD_VISIBLE_TIME = 6
 const val EXPLOSION_VISIBLE_TIME = 10
 val EXPLOSION_COLORS = listOf<Color>(
     Color.YELLOW,
