@@ -61,10 +61,9 @@ class GameConnector(frame: JFrame) {
         frame.add(canvas, BorderLayout.SOUTH)
 
         // Create KeyListener and finish configuring frame
-        keyListener = GameKeyListener(playerEvents.toMutableList())
+        keyListener = GameKeyListener()
         frame.addKeyListener(keyListener)
         frame.pack()
-
 
         // Configure Timers
         timer.scheduleAtFixedRate(paintTimerTask, 500, PAINT_TIMER_INTERVAL)
@@ -79,6 +78,12 @@ class GameConnector(frame: JFrame) {
         animationTimerTask.addFunction(playerTwo.cannon::switchAnimation)
         animationTimerTask.addFunction(playerOne.shield::switchAnimation)
         animationTimerTask.addFunction(playerTwo.shield::switchAnimation)
+        // GameKeyEvents are added with delay
+        // TODO Maybe Better to make the controls so they can be activated and deactivated?
+        moveTimerTask.addElement(DelayedExecution(
+                { keyListener.gameKeyList = playerEvents.toMutableList() },
+                13
+        ))
 
         // Configure Targeting
         playerOne.cannon.getTarget = acquireTarget(playerTwo)
@@ -124,11 +129,9 @@ class GameConnector(frame: JFrame) {
         animationTimerTask.addFunction { explosion.switchAnimation() }
         keyListener.removeEventsByPlayerName(destroyedPlayerName)
         moveTimerTask.addElement(DelayedExecution(
-                ::endGame,
+                {endGame(Pair(destroyedPlayerName,winnerName))},
                 25,
-                Pair(destroyedPlayerName, winnerName)
         ))
-
     }
 
     private fun endGame( names: Pair<String, String>){
@@ -136,7 +139,6 @@ class GameConnector(frame: JFrame) {
         println("${names.first} was destroyed!!")
         println("${names.second} has won")
     }
-
 
 }
 

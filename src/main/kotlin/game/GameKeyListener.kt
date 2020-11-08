@@ -4,10 +4,10 @@ import helper.logger
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
 
-class GameKeyListener(private val gameKeyList: MutableList<GameKeyEvent>) : KeyListener {
-    override fun keyTyped(e: KeyEvent?) {
+class GameKeyListener : KeyListener {
+    var gameKeyList: MutableList<GameKeyEvent> = mutableListOf()
 
-    }
+    override fun keyTyped(e: KeyEvent?) {}
 
     override fun keyPressed(e: KeyEvent?) {
         logger("keyPressed $e", false)

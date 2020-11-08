@@ -1,12 +1,10 @@
 package game
 
 import java.util.*
-import kotlin.reflect.KFunction1
 
 interface Movable {
     fun move()
 }
-
 
 class MoveTimerTask(
     private val movables : MutableList<Movable> = mutableListOf(),
@@ -51,18 +49,17 @@ class PaintTimerTask(
 
 }
 
-class DelayedExecution<T>(
-        // TODO Fragen: kann man statt dem generischen Parameter T eine Funktion nehmen mit Any Paramter?
-        private val returnFunction: (T) -> Any,
+class DelayedExecution(
+        // TODO Fragen: kann man einen Funktionsparameter definieren der egal welche Funktion nimmt?
+        private val returnFunction: () -> Unit,
         private val maxCycles: Int,
-        private val arg: T
 ) : Movable{
     private var counter = 0
 
     override fun move() {
         counter++
         if (counter >= maxCycles){
-            returnFunction.invoke(arg)
+            returnFunction.invoke()
         }
     }
 }

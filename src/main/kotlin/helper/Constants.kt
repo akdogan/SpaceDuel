@@ -22,7 +22,7 @@ const val SHIP_TURN_AMOUNT = 10.0
 const val SHIP_INITIAL_SPEED = 0.3
 // buffer for the ship dissappearing from one side and reappearing on the other
 const val SHIP_SCREEN_BOUND = 25
-const val RELATIVE_START_X = 100
+const val RELATIVE_START_X = -65
 const val RELATIVE_START_Y = 200
 
 // LASER AND SHIELDS
