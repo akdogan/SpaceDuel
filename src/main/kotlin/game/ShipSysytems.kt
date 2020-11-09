@@ -93,14 +93,14 @@ class LaserCannon : Movable {
         }
     }
 }
-
+// Could be a companion Object?
 class LaserShot(
     var pos: Point,
     private val vector: Vector,
     ) {
 
     fun move(){
-        pos.location = calculatePoint(pos, vector)
+        pos.location = pos + vector
     }
 
     fun outOfBounds(): Boolean{

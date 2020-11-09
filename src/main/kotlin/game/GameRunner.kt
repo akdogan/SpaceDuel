@@ -68,22 +68,19 @@ class GameConnector(frame: JFrame) {
         // Configure Timers
         timer.scheduleAtFixedRate(paintTimerTask, 500, PAINT_TIMER_INTERVAL)
         timer.scheduleAtFixedRate(moveTimerTask, 1000, MOVE_TIMER_INTERVAL)
-        moveTimerTask.addElement(playerOne)
-        moveTimerTask.addElement(playerOne.cannon)
-        moveTimerTask.addElement(playerTwo)
-        moveTimerTask.addElement(playerTwo.cannon)
-        moveTimerTask.addElement(backgroundStars)
+        moveTimerTask += playerOne
+        moveTimerTask += playerOne.cannon
+        moveTimerTask += playerTwo
+        moveTimerTask += playerTwo.cannon
+        moveTimerTask += backgroundStars
         timer.scheduleAtFixedRate(animationTimerTask,1000, ANIMATION_TIMER_INTERVAL)
-        animationTimerTask.addFunction(playerOne.cannon::switchAnimation)
-        animationTimerTask.addFunction(playerTwo.cannon::switchAnimation)
-        animationTimerTask.addFunction(playerOne.shield::switchAnimation)
-        animationTimerTask.addFunction(playerTwo.shield::switchAnimation)
+        animationTimerTask += playerOne.cannon::switchAnimation
+        animationTimerTask += playerTwo.cannon::switchAnimation
+        animationTimerTask += playerOne.shield::switchAnimation
+        animationTimerTask += playerTwo.shield::switchAnimation
         // GameKeyEvents are added with delay
         // TODO Maybe Better to make the controls so they can be activated and deactivated?
-        moveTimerTask.addElement(DelayedExecution(
-                { keyListener.gameKeyList = playerEvents.toMutableList() },
-                13
-        ))
+        moveTimerTask += DelayedExecution({ keyListener.gameKeyList = playerEvents.toMutableList() }, 13)
 
         // Configure Targeting
         playerOne.cannon.getTarget = acquireTarget(playerTwo)
@@ -126,12 +123,9 @@ class GameConnector(frame: JFrame) {
     }
     
     private fun triggerEndAnimation(destroyedPlayerName: String, winnerName:String, explosion: Explosion){
-        animationTimerTask.addFunction { explosion.switchAnimation() }
+        animationTimerTask += { explosion.switchAnimation() }
         keyListener.removeEventsByPlayerName(destroyedPlayerName)
-        moveTimerTask.addElement(DelayedExecution(
-                {endGame(Pair(destroyedPlayerName,winnerName))},
-                25,
-        ))
+        moveTimerTask += DelayedExecution( {endGame(Pair(destroyedPlayerName,winnerName))}, 25 )
     }
 
     private fun endGame( names: Pair<String, String>){

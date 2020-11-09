@@ -114,6 +114,7 @@ fun calculateVector(p1: Point, p2: Point): Pair<Int, Int>{
  * @param degree degree of rotation (in degree, will be converted to radians)
  * @return
  */
+// Could be extension function of Vector
 fun rotate(p: Point, vector: Vector, degree: Double): Point{
     val alpha = Math.toRadians(degree)
     val pxTemp = round(((cos(alpha) * vector.v1) + (-sin(alpha) * vector.v2)) + p.x)
@@ -122,15 +123,14 @@ fun rotate(p: Point, vector: Vector, degree: Double): Point{
 }
 
 /**
- * Calculates and returns a new Point from a point and a vector
- * @param p A point from which the new point is calculated
+ * Adds a vector to the point and returns the resulting point
  * @param v A vector which is added to point p to calculate the new Point. Exact length
  * of this vector is used to calculate the new point
  * @return New Point based on the calculation
  */
-fun calculatePoint(p: Point, v: Vector): Point{
-    val zeroB1 = p.x + v.v1
-    val zeroB2 = p.y + v.v2
+operator fun Point.plus(v: Vector): Point{
+    val zeroB1 = this.x + v.v1
+    val zeroB2 = this.y + v.v2
 
     return Point(zeroB1,zeroB2)
 }

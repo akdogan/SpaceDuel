@@ -16,6 +16,7 @@ class Ship(
     private val fillColor: Color,
     shieldColors: List<Color>
 ) : Movable{
+    //TODO Some Properties could maybe be lazyinit
     var center = center
         private set
     private lateinit var tip: Point
@@ -44,13 +45,13 @@ class Ship(
 
     private fun calculateShip(){
         //calculateTip()
-        tip = calculatePoint(center, vector)
+        tip = center + vector
         //calculateRear()
-        rear = calculatePoint(tip, vector.reverse().changeLength(centerLine))
+        rear = tip + vector.reverse().changeLength(centerLine)
         //calculateLeftWingTip()
-        leftWingTip = calculatePoint(rear, vector.turnClock().changeLength(round(sideLength * 0.5)))
+        leftWingTip = rear + vector.turnClock().changeLength(round(sideLength * 0.5))
         //calculateRightWingTip()
-        rightWingTip = calculatePoint(rear, vector.turnCounterClock().changeLength(round(sideLength * 0.5)))
+        rightWingTip = rear + vector.turnCounterClock().changeLength(round(sideLength * 0.5))
         // calculate velocity
         velocity = vector.multiply(SHIP_INITIAL_SPEED)
         // calculate centerLine
@@ -95,7 +96,7 @@ class Ship(
         val db = false
         logger("Before Move\n ${positionToString()}", db)
 
-        center = calculatePoint( center, velocity)
+        center += velocity
         outOfScreen()
         calculateShip()
         if (turningClock) turn(SHIP_TURN_AMOUNT)

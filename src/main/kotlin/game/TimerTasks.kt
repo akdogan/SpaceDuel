@@ -7,6 +7,7 @@ interface Movable {
 }
 
 class MoveTimerTask(
+        // Not sure why there is no concurrency problem with this method
     private val movables : MutableList<Movable> = mutableListOf(),
     private var movablesToAdd : MutableList<Movable> = mutableListOf()
 
@@ -19,13 +20,14 @@ class MoveTimerTask(
         movables.forEach { it.move() }
     }
 
-    fun addElement(m: Movable){
+    operator fun plusAssign(m: Movable){
         movablesToAdd.add(m)
     }
 
 }
 // TODO Fragen: Zwei Konzepte, Interface implementieren (movable) oder Funktion
 //  direkt zum ausführen geben (Animation Timer), was ist besser?
+// Evtl. Beide Timer zu einem generischen Timer zusammenführen
 class AnimationTimerTask(
 
 ) : TimerTask(){
@@ -36,6 +38,10 @@ class AnimationTimerTask(
     }
 
     fun addFunction(function: () -> Unit ){
+        functionList.add(function)
+    }
+
+    operator fun plusAssign(function: () -> Unit ){
         functionList.add(function)
     }
 }
@@ -51,6 +57,7 @@ class PaintTimerTask(
 
 class DelayedExecution(
         // TODO Fragen: kann man einen Funktionsparameter definieren der egal welche Funktion nimmt?
+        // TODO Could be replaced with object expression
         private val returnFunction: () -> Unit,
         private val maxCycles: Int,
 ) : Movable{
