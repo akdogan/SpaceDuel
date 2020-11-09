@@ -17,6 +17,6 @@ The game was build from scratch using only the Kotlin / Java standard library
 
 ### Roadmap
 - [x] Basic playable prototyp
-- [ ] Add an ingame HUD showing the player stats
+- [x] Add an ingame HUD showing the player stats
 - [ ] Add Start Screen
 - [ ] Add proper Animations and messages for end of game
