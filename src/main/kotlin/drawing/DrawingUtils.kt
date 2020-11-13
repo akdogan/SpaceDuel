@@ -13,7 +13,7 @@ class BackgroundStars: Movable {
     }
 
 
-    override fun move(){
+    override fun move() {
         stars.forEach { it.p.x -= STAR_SPEED }
         if (stars.removeIf { it.p.x <= 0 }){
             createNewStars()

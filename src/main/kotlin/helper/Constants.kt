@@ -7,10 +7,11 @@ import java.awt.Point
 // GENERAL CONFIG
 const val WINDOW_HEIGHT = 720
 const val WINDOW_WIDTH = 1080
-const val PAINT_TIMER_INTERVAL = 5L // Every 20ms -> 50 FPS
+const val PAINT_TIMER_INTERVAL = 10L // Every 20ms -> 50 FPS
 const val MOVE_TIMER_INTERVAL = 50L
 const val ANIMATION_TIMER_INTERVAL = 100L
 const val DEBUG = false
+const val SYSTEM_KEY_EVENT_NAME = "System"
 
 
 // SHIP CONFIGURATION
@@ -33,7 +34,7 @@ const val LASER_SHOT_SIZE = 6
 // number of cycles of the move timer until another shot is fired
 const val LASER_RECHARGE_TIME = 8
 const val LASER_SPEED = 0.8
-const val SHIELD_MAX_CHARGE = 6
+const val SHIELD_MAX_CHARGE = 4
 // number of cycles of the move timer the shields are visible
 const val SHIELD_VISIBLE_TIME = 6
 const val EXPLOSION_VISIBLE_TIME = 10
@@ -77,6 +78,7 @@ const val P1_FIRE = 87
 const val P2_LEFT = 37
 const val P2_RIGHT = 39
 const val P2_FIRE = 38
+const val START_RESTART = 32
 
 // BACKGROUND
 const val AMOUNT_OF_STARS = 50

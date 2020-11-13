@@ -10,6 +10,8 @@ class Shield(private val shieldColor: List<Color>) {
     private var activeCounter = 0
     var powerLeft = SHIELD_MAX_CHARGE
 
+    // TODO Fragen reset and init duplicate code: how to unify
+
     /**
      * Triggers the shields
      * @return Returns true, if the shield level dropped to 0 and thus the ship is destroyed
@@ -31,6 +33,11 @@ class Shield(private val shieldColor: List<Color>) {
             active = false
             activeCounter = 0
         }
+    }
+    fun reset(){
+        powerLeft = SHIELD_MAX_CHARGE
+        active = false
+        activeCounter = 0
     }
 }
 
@@ -75,22 +82,24 @@ class LaserCannon : Movable {
         fun checkCollision(p1: Point, p2: Point, d: Int): Boolean{
             return (calculateDistance(p1, p2) <= d)
         }
-        // Gets stats of the other ship
-        val target = getTarget?.invoke()
-        // target is nullable, therefore check required
-        if (target != null){
-            // checks collision, if true is returned, hit target function with the other ship is invoked
+        // Gets stats of the other ship. Target is nullable, therefor checks required
+        getTarget?.invoke()?.let{ target ->
+            // Removes shot if hit; removeIf returns true on hit
             if (shots.removeIf {
-                    checkCollision(it.pos, target.first, target.second)}
-                    ){
+                        checkCollision(it.pos, target.first, target.second)}
+            ){
                 hitTarget?.invoke()
-                }
             }
+        }
         rechargeCounter++
         if (rechargeCounter >= LASER_RECHARGE_TIME){
             rechargeCounter = 0
             charged = true
         }
+    }
+
+    fun reset() {
+        shots = mutableListOf()
     }
 }
 // Could be a companion Object?
@@ -113,6 +122,10 @@ class Explosion() {
     var animationCounter = 0
     var running = false
 
+    fun reset(){
+        animationCounter = 0
+        running = false
+    }
 
     fun switchAnimation() {
         if (running){

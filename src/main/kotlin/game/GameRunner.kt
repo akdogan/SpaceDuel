@@ -8,7 +8,11 @@ import java.awt.Point
 import java.util.*
 import javax.swing.JFrame
 
-class GameConnector(frame: JFrame) {
+class GameConnector(
+        val frame: JFrame,
+        private val keyListener: GameKeyListener,
+        private val backgroundStars: BackgroundStars
+) {
     // Create Player One and Two Ships and KeyEvents
     private val playerOne: Ship = Ship(
         P1_NAME,
@@ -32,17 +36,19 @@ class GameConnector(frame: JFrame) {
         GameKeyEvent(P1_NAME, P1_FIRE, {playerOne.firing = true}, {playerOne.firing = false}),
         GameKeyEvent(P2_NAME, P2_RIGHT, {playerTwo.turningClock = true}, {playerTwo.turningClock = false}),
         GameKeyEvent(P2_NAME, P2_LEFT, {playerTwo.turningCounterClock = true}, {playerTwo.turningCounterClock = false}),
-        GameKeyEvent(P2_NAME, P2_FIRE, {playerTwo.firing = true}, {playerTwo.firing = false})
+        GameKeyEvent(P2_NAME, P2_FIRE, {playerTwo.firing = true}, {playerTwo.firing = false}),
+        GameKeyEvent(SYSTEM_KEY_EVENT_NAME, START_RESTART, ::restart, {})
     )
 
-    private val canvas: GameDrawCanvas = GameDrawCanvas(WINDOW_WIDTH, WINDOW_HEIGHT )
+    private val canvas = GameDrawCanvas(WINDOW_WIDTH, WINDOW_HEIGHT )
     private val hud = GameHudCanvas(WINDOW_WIDTH, HUD_HEIGHT)
-    private val keyListener: GameKeyListener
+
     private val moveTimerTask = MoveTimerTask()
     private val paintTimerTask = PaintTimerTask(::collectAndRepaint)
     private val animationTimerTask = AnimationTimerTask()
     private val timer = Timer()
-    private val backgroundStars = BackgroundStars()
+    private var playerList = setOf(playerOne, playerTwo)
+
 
     init {
         // add Canvas to Frame
@@ -57,30 +63,32 @@ class GameConnector(frame: JFrame) {
             P2_LINE_COLOR,
             SHIELD_MAX_CHARGE
         ))
-        frame.add(hud, BorderLayout.NORTH)
-        frame.add(canvas, BorderLayout.SOUTH)
+        frame.add(hud, BorderLayout.SOUTH)
+        frame.add(canvas, BorderLayout.NORTH)
 
         // Create KeyListener and finish configuring frame
-        keyListener = GameKeyListener()
-        frame.addKeyListener(keyListener)
+        keyListener.removeAllEvents()
+        keyListener.addEvents(playerEvents.toMutableList())
+        //frame.addKeyListener(keyListener)
         frame.pack()
 
-        // Configure Timers
-        timer.scheduleAtFixedRate(paintTimerTask, 500, PAINT_TIMER_INTERVAL)
+        // Configure Timers TODO Delays could be removed
+        timer.scheduleAtFixedRate(paintTimerTask, 0, PAINT_TIMER_INTERVAL)
         timer.scheduleAtFixedRate(moveTimerTask, 1000, MOVE_TIMER_INTERVAL)
         moveTimerTask += playerOne
         moveTimerTask += playerOne.cannon
         moveTimerTask += playerTwo
         moveTimerTask += playerTwo.cannon
         moveTimerTask += backgroundStars
-        timer.scheduleAtFixedRate(animationTimerTask,1000, ANIMATION_TIMER_INTERVAL)
+        timer.scheduleAtFixedRate(animationTimerTask,0, ANIMATION_TIMER_INTERVAL)
         animationTimerTask += playerOne.cannon::switchAnimation
         animationTimerTask += playerTwo.cannon::switchAnimation
         animationTimerTask += playerOne.shield::switchAnimation
         animationTimerTask += playerTwo.shield::switchAnimation
         // GameKeyEvents are added with delay
-        // TODO Maybe Better to make the controls so they can be activated and deactivated?
-        moveTimerTask += DelayedExecution({ keyListener.gameKeyList = playerEvents.toMutableList() }, 13)
+        // TODO Something wrong
+        schedule(1650) {keyListener.activateEvents(playerOne.name)}
+        schedule(1600) {keyListener.activateEvents(playerTwo.name)}
 
         // Configure Targeting
         playerOne.cannon.getTarget = acquireTarget(playerTwo)
@@ -88,6 +96,9 @@ class GameConnector(frame: JFrame) {
         playerTwo.cannon.getTarget = acquireTarget(playerOne)
         playerTwo.cannon.hitTarget = hitTarget(playerOne)
     }
+
+
+
 
     // Returns a function that returns the given ships center and radius
     private fun acquireTarget(ship: Ship): () -> Triple<Point, Int, String>{
@@ -101,6 +112,10 @@ class GameConnector(frame: JFrame) {
             // empty and thus the ship was destroyed. Function triggerEndAnimation() ends the game
             ship.hit(::triggerEndAnimation)
         }
+    }
+
+    private fun schedule(delay: Int, function: ()-> Unit){
+        timer.schedule(DelayedFunctionRunTask(function), delay.toLong())
     }
 
     private fun collectAndRepaint(){
@@ -124,14 +139,41 @@ class GameConnector(frame: JFrame) {
     
     private fun triggerEndAnimation(destroyedPlayerName: String, winnerName:String, explosion: Explosion){
         animationTimerTask += { explosion.switchAnimation() }
-        keyListener.removeEventsByPlayerName(destroyedPlayerName)
-        moveTimerTask += DelayedExecution( {endGame(Pair(destroyedPlayerName,winnerName))}, 25 )
+        keyListener.deactivateEvents(destroyedPlayerName)
+        schedule(1250) {endGame(Pair(destroyedPlayerName,winnerName))}
     }
 
     private fun endGame( names: Pair<String, String>){
-        timer.cancel()
+        //timer.cancel()
         println("${names.first} was destroyed!!")
         println("${names.second} has won")
+        println("Press Enter to restart")
+        // deactivate loosing player
+        playerList.find { it.name == names.first }?.active = false
+        playerList.find { it.name == names.first }?.lock()
+        playerList.find {it.name == names.second}?.lock()
+        // playerList.find { it.name == names.first }?.exploding = false
+        // deactivate winning player controls
+        keyListener.deactivateEvents(names.second)
+        // display Press Enter to restart TODO
+        // activate "Enter to restart" event
+        keyListener.activateEvents(SYSTEM_KEY_EVENT_NAME)
+        // Restart on "Enter" press
+    }
+
+    private fun restart() {
+        // deactivate system key events
+        keyListener.deactivateEvents(SYSTEM_KEY_EVENT_NAME)
+        // Reset both player positions
+        playerOne.reset(P1_START_POINT, P1_START_VECTOR)
+        playerTwo.reset(P2_START_POINT, P2_START_VECTOR)
+        // activate loosing player / deactivate loosing player explosion status
+        // reactivate controls of winning player
+        playerList.forEach {
+            schedule(650) {keyListener.activateEvents(it.name)}
+        }
+
+
     }
 
 }

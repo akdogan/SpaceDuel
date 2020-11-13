@@ -35,11 +35,24 @@ class Ship(
     val shield = Shield(shieldColors)
     var exploding = false
     val explosion = Explosion()
+    var active = true
 
 
     init {
         calculateShip()
         radius = calculateDistance(center, tip)
+    }
+
+    fun reset(p: Point, v: Vector){
+        center = p
+        vector = v
+        calculateShip()
+        exploding = true
+        active = true
+        cannon.reset()
+        shield.reset()
+        explosion.reset()
+
     }
 
 
@@ -61,56 +74,57 @@ class Ship(
 
     fun collectShapes(): List<GameShapes>{
         val shapeList = mutableListOf<GameShapes>()
-        if (!explosion.running) {
-            val poly = Polygon()
-            poly.addPoint(leftWingTip.x, leftWingTip.y)
-            poly.addPoint(rear.x, rear.y)
-            poly.addPoint(rightWingTip.x, rightWingTip.y)
-            poly.addPoint(tip.x, tip.y)
-            shapeList.add(ShipTriangle(fillColor, poly))
-            shapeList.add(ShipOutLine(lineColor, poly, HelperLine(rear, tip)))
-            if (shield.active){
+        if (active){
+            if (!explosion.running) {
+                val poly = Polygon()
+                poly.addPoint(leftWingTip.x, leftWingTip.y)
+                poly.addPoint(rear.x, rear.y)
+                poly.addPoint(rightWingTip.x, rightWingTip.y)
+                poly.addPoint(tip.x, tip.y)
+                shapeList.add(ShipTriangle(fillColor, poly))
+                shapeList.add(ShipOutLine(lineColor, poly, HelperLine(rear, tip)))
+                if (shield.active){
+                    shapeList.add(ShipCircle(
+                            shield.getCurrentShieldColor(),
+                            Point(center.x - radius, center.y - radius),
+                            2 * radius,
+                            true
+                    ))
+                }
+                shapeList.addAll(cannon.collectPixels())
+            }
+            else {
                 shapeList.add(ShipCircle(
-                    shield.getCurrentShieldColor(),
-                    Point(center.x - radius, center.y - radius),
-                    2 * radius,
-                    true
+                        explosion.getCurrentColor(),
+                        Point(center.x - radius, center.y - radius),
+                        2 * radius,
+                        false
                 ))
             }
-            shapeList.addAll(cannon.collectPixels())
-
-        }
-        else {
-            shapeList.add(ShipCircle(
-                explosion.getCurrentColor(),
-                Point(center.x - radius, center.y - radius),
-                2 * radius,
-                false
-            ))
         }
         return shapeList
     }
 
 
-    override fun move(){
+    override fun move() {
         val db = false
         logger("Before Move\n ${positionToString()}", db)
-
-        center += velocity
-        outOfScreen()
-        calculateShip()
-        if (turningClock) turn(SHIP_TURN_AMOUNT)
-        if (turningCounterClock) turn(-SHIP_TURN_AMOUNT)
-        calculateShip()
-        if (firing) fire()
-
+        if (active){
+            center += velocity
+            outOfScreen()
+            calculateShip()
+            if (turningClock) turn(SHIP_TURN_AMOUNT)
+            if (turningCounterClock) turn(-SHIP_TURN_AMOUNT)
+            calculateShip()
+            if (firing) fire()
+        }
         logger("After Move\n ${positionToString()}", db)
     }
 
     private fun turn(degree: Double){
         tip.location = rotate(center,vector,degree)
         vector = Vector(center, tip)
-        calculateShip()
+        //calculateShip()
     }
 
     private fun outOfScreen(){
@@ -155,6 +169,12 @@ class Ship(
             Left: $leftWingTip
             Right: $rightWingTip
         """.trimIndent()
+    }
+
+    fun lock() {
+        turningCounterClock = false
+        turningClock = false
+        firing = false
     }
 
 }

@@ -19,33 +19,24 @@ class GameHudCanvas(
     override fun paintComponent(g: Graphics) {
         fun drawShield(start: Int, charge: Int){
             val availableWidth = WINDOW_WIDTH / 2 - SIDE_MARGIN * 2
-            val itemWidth = availableWidth / (SHIELD_MAX_CHARGE - 1)
+            val itemWidth = availableWidth / (SHIELD_MAX_CHARGE)
             val itemHeight = 30
             val itemY = 60
-            for ( i in 0 until SHIELD_MAX_CHARGE-1){
-                if ( i < charge-1){
-                    g.fill3DRect(
-                        i * itemWidth + start,
-                        itemY,
-                        itemWidth - 5,
-                        itemHeight,
-                        true
-                    )
+            for ( i in 0 until SHIELD_MAX_CHARGE){
+                val x = i * itemWidth + start
+                val width = itemWidth -5
+                if ( i < charge){
+                    g.fill3DRect(x, itemY, width, itemHeight, true)
                 }
                 else {
-                    g.draw3DRect(
-                        i * itemWidth + start,
-                        itemY,
-                        itemWidth - 5,
-                        itemHeight,
-                        true
-                    )
+                    g.draw3DRect(x, itemY, width, itemHeight, true)
                 }
 
             }
         }
         super.paintComponent(g)
         g.font = (Font(Font.SANS_SERIF, Font.BOLD, 30))
+
         // Draw Player 1 Components
         g.color = labels.first.color
         val xp1 = SIDE_MARGIN

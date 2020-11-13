@@ -27,7 +27,7 @@ class MoveTimerTask(
 }
 // TODO Fragen: Zwei Konzepte, Interface implementieren (movable) oder Funktion
 //  direkt zum ausführen geben (Animation Timer), was ist besser?
-// Evtl. Beide Timer zu einem generischen Timer zusammenführen
+// Evtl. Beide Timer zu einem generischen Timer zusammenführen <T> fun und dann in run ausführen
 class AnimationTimerTask(
 
 ) : TimerTask(){
@@ -35,10 +35,6 @@ class AnimationTimerTask(
 
     override fun run() {
         functionList.forEach { it.invoke() }
-    }
-
-    fun addFunction(function: () -> Unit ){
-        functionList.add(function)
     }
 
     operator fun plusAssign(function: () -> Unit ){
@@ -55,19 +51,15 @@ class PaintTimerTask(
 
 }
 
-class DelayedExecution(
-        // TODO Fragen: kann man einen Funktionsparameter definieren der egal welche Funktion nimmt?
-        // TODO Could be replaced with object expression
-        private val returnFunction: () -> Unit,
-        private val maxCycles: Int,
-) : Movable{
-    private var counter = 0
+// TODO Fragen: kann man einen Funktionsparameter definieren der egal welche Funktion nimmt?
+// TODO Could be replaced with object expression
 
-    override fun move() {
-        counter++
-        if (counter >= maxCycles){
-            returnFunction.invoke()
-        }
+class DelayedFunctionRunTask(
+        private val returnFunction: () -> Unit,
+) : TimerTask() {
+
+    override fun run() {
+        returnFunction.invoke()
     }
 }
 

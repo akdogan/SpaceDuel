@@ -11,19 +11,38 @@ class GameKeyListener : KeyListener {
 
     override fun keyPressed(e: KeyEvent?) {
         logger("keyPressed $e", false)
-        val k = gameKeyList.find{ it.gameKeyCode == e?.keyCode}
+        val k = gameKeyList.find{ it.isActive && it.gameKeyCode == e?.keyCode}
         k?.pressGameAction?.invoke()
 
     }
 
     override fun keyReleased(e: KeyEvent?) {
         logger("keyReleased $e", false)
-        val k = gameKeyList.find{ it.gameKeyCode == e?.keyCode}
+        val k = gameKeyList.find{ it.isActive && it.gameKeyCode == e?.keyCode}
         k?.releaseGameAction?.invoke()
     }
 
-    fun removeEventsByPlayerName(name: String){
-        gameKeyList.removeIf { it.playerName == name }
+    fun addEvent(event: GameKeyEvent) = gameKeyList.add(event)
+    fun addEvents(events: List<GameKeyEvent>) = gameKeyList.addAll(events)
+    fun removeAllEvents() = gameKeyList.removeAll { true }
+
+    private fun switchEvents(name: String, state: Boolean){
+        if (name.isEmpty()){
+            gameKeyList.forEach { it.isActive = state }
+        }
+        else {
+            gameKeyList.forEach {
+                if (it.playerName == name) {
+                    it.isActive = state
+                    println("switched: ${it.playerName} to $state")
+            } }
+        }
+    }
+
+    fun activateEvents(name: String = "") = switchEvents(name, true)
+    fun deactivateEvents(name: String = "") {
+        switchEvents(name, false)
+        println("events deactivated: $name")
     }
 }
 
@@ -31,7 +50,8 @@ class GameKeyEvent(
     val playerName: String,
     val gameKeyCode: Int,
     val pressGameAction: () -> Unit,
-    val releaseGameAction: () -> Unit
+    val releaseGameAction: () -> Unit,
+    var isActive: Boolean = false
 )
 
 /*
