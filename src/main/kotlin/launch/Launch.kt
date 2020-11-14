@@ -4,6 +4,7 @@ import drawing.BackgroundStars
 import game.GameConnector
 import game.GameKeyEvent
 import game.GameKeyListener
+import game.State
 import helper.*
 import java.awt.Color
 import javax.swing.JFrame
@@ -47,7 +48,7 @@ class GameLauncher(val frame: JFrame){
                 START_RESTART,
                 ::startGame,
                 {},
-                true)
+                State.ACTIVE)
         )
         frame.addKeyListener(keyListener)
     }

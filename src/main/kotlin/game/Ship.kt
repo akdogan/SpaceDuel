@@ -171,7 +171,7 @@ class Ship(
         """.trimIndent()
     }
 
-    fun lock() {
+    fun shutDownMovement() {
         turningCounterClock = false
         turningClock = false
         firing = false

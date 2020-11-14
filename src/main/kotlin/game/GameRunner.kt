@@ -1,6 +1,7 @@
 package game
 
 import drawing.*
+import game.State.*
 import helper.*
 import java.awt.BorderLayout
 import java.awt.Color
@@ -69,7 +70,6 @@ class GameConnector(
         // Create KeyListener and finish configuring frame
         keyListener.removeAllEvents()
         keyListener.addEvents(playerEvents.toMutableList())
-        //frame.addKeyListener(keyListener)
         frame.pack()
 
         // Configure Timers TODO Delays could be removed
@@ -87,8 +87,8 @@ class GameConnector(
         animationTimerTask += playerTwo.shield::switchAnimation
         // GameKeyEvents are added with delay
         // TODO Something wrong
-        schedule(1650) {keyListener.activateEvents(playerOne.name)}
-        schedule(1600) {keyListener.activateEvents(playerTwo.name)}
+        schedule(1650) {keyListener.switchEventsByName(ACTIVE, playerOne.name, playerTwo.name)}
+        //schedule(1600) {keyListener.activateEvents(playerTwo.name)}
 
         // Configure Targeting
         playerOne.cannon.getTarget = acquireTarget(playerTwo)
@@ -139,7 +139,7 @@ class GameConnector(
     
     private fun triggerEndAnimation(destroyedPlayerName: String, winnerName:String, explosion: Explosion){
         animationTimerTask += { explosion.switchAnimation() }
-        keyListener.deactivateEvents(destroyedPlayerName)
+        keyListener.switchEventsByName(INACTIVE, destroyedPlayerName)
         schedule(1250) {endGame(Pair(destroyedPlayerName,winnerName))}
     }
 
@@ -150,28 +150,25 @@ class GameConnector(
         println("Press Enter to restart")
         // deactivate loosing player
         playerList.find { it.name == names.first }?.active = false
-        playerList.find { it.name == names.first }?.lock()
-        playerList.find {it.name == names.second}?.lock()
-        // playerList.find { it.name == names.first }?.exploding = false
+        playerList.forEach { it.shutDownMovement() }
         // deactivate winning player controls
-        keyListener.deactivateEvents(names.second)
+        keyListener.switchEventsByName(INACTIVE, playerOne.name, playerTwo.name)
         // display Press Enter to restart TODO
         // activate "Enter to restart" event
-        keyListener.activateEvents(SYSTEM_KEY_EVENT_NAME)
+        keyListener.switchEventsByName(ACTIVE, SYSTEM_KEY_EVENT_NAME)
         // Restart on "Enter" press
     }
 
     private fun restart() {
         // deactivate system key events
-        keyListener.deactivateEvents(SYSTEM_KEY_EVENT_NAME)
+        keyListener.switchEventsByName(INACTIVE, SYSTEM_KEY_EVENT_NAME)
         // Reset both player positions
         playerOne.reset(P1_START_POINT, P1_START_VECTOR)
         playerTwo.reset(P2_START_POINT, P2_START_VECTOR)
         // activate loosing player / deactivate loosing player explosion status
         // reactivate controls of winning player
-        playerList.forEach {
-            schedule(650) {keyListener.activateEvents(it.name)}
-        }
+        schedule(650) {keyListener.switchEventsByName(ACTIVE, playerOne.name, playerTwo.name)}
+
 
 
     }
