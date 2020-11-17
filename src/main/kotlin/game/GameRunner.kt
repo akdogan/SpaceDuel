@@ -70,6 +70,7 @@ class GameConnector(
         ))
         frame.add(hud, BorderLayout.SOUTH)
         frame.add(canvas, BorderLayout.NORTH)
+        backgroundStars.height = WINDOW_HEIGHT
 
         // Create KeyListener and finish configuring frame
         keyListener.removeAllEvents()

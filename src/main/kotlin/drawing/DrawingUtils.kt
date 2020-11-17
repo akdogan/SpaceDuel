@@ -4,7 +4,7 @@ import helper.*
 import java.awt.Point
 import kotlin.random.Random
 
-class BackgroundStars {
+class BackgroundStars(var height: Int) {
     private val stars: MutableList<Pixel>
 
     init {
@@ -23,7 +23,7 @@ class BackgroundStars {
         val list = mutableListOf<Pixel>()
         repeat(AMOUNT_OF_STARS){
             val x = Random.nextInt(WINDOW_WIDTH - 20) + 10
-            val y = Random.nextInt(WINDOW_HEIGHT - 20) + 10
+            val y = Random.nextInt(height - 20) + 10
             list.add(Pixel(STAR_COLOR, Point(x,y), STAR_SIZE))
         }
         return list
@@ -34,7 +34,7 @@ class BackgroundStars {
         repeat(starsToCreate) {
             stars.add(Pixel(
                 STAR_COLOR,
-                Point(WINDOW_WIDTH, (Random.nextInt(WINDOW_HEIGHT -10 ) + 5)),
+                Point(WINDOW_WIDTH, (Random.nextInt(height -10 ) + 5)),
                 STAR_SIZE
             ))
         }

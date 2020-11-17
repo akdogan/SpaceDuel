@@ -27,7 +27,7 @@ fun main() {
 }
 
 class GameLauncher(val frame: JFrame){
-    private val backgroundStars = BackgroundStars()
+    private val backgroundStars = BackgroundStars(WINDOW_HEIGHT + HUD_HEIGHT)
     private val launchCanvas: LaunchCanvas = LaunchCanvas(
             WINDOW_WIDTH,
             WINDOW_HEIGHT + HUD_HEIGHT,
