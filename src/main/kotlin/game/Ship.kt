@@ -10,12 +10,12 @@ import kotlin.math.sqrt
 
 class Ship(
     val name: String,
-    center: Point, //TODO Fragen: val hier definieren und private set machen
+    center: Point,
     private var vector: Vector,
     private val lineColor: Color,
     private val fillColor: Color,
     shieldColors: List<Color>
-) : Movable{
+){
     //TODO Some Properties could maybe be lazyinit
     var center = center
         private set
@@ -106,7 +106,7 @@ class Ship(
     }
 
 
-    override fun move() {
+    fun move() {
         val db = false
         logger("Before Move\n ${positionToString()}", db)
         if (active){
@@ -128,19 +128,20 @@ class Ship(
     }
 
     private fun outOfScreen(){
-        // TODO fragen: wie kann man daraus when machen
         val boundA = SHIP_SCREEN_BOUND
-        if (center.x >= WINDOW_WIDTH + radius - boundA){
-            center.x = 0 - radius + boundA
-        }
-        else if (center.x <= 0 - radius + boundA) {
-            center.x = WINDOW_WIDTH + radius - boundA
-        }
-        else if (center.y >= WINDOW_HEIGHT + radius - boundA){
-            center.y = 0 - radius + boundA
-        }
-        else if (center.y <= 0 - radius + boundA) {
-            center.y = WINDOW_HEIGHT + radius - boundA
+        when {
+            center.x >= WINDOW_WIDTH + radius - boundA -> {
+                center.x = 0 - radius + boundA
+            }
+            center.x <= 0 - radius + boundA -> {
+                center.x = WINDOW_WIDTH + radius - boundA
+            }
+            center.y >= WINDOW_HEIGHT + radius - boundA -> {
+                center.y = 0 - radius + boundA
+            }
+            center.y <= 0 - radius + boundA -> {
+                center.y = WINDOW_HEIGHT + radius - boundA
+            }
         }
 
     }

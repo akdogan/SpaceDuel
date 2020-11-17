@@ -30,7 +30,7 @@ const val RELATIVE_START_Y = 200
 val LASER_COLOR_ONE: Color = Color.YELLOW
 val LASER_COLOR_TWO: Color = Color.ORANGE
 val LASER_COLOR_THREE: Color = Color.RED
-const val LASER_SHOT_SIZE = 6
+const val LASER_SHOT_SIZE = 8
 // number of cycles of the move timer until another shot is fired
 const val LASER_RECHARGE_TIME = 8
 const val LASER_SPEED = 0.8

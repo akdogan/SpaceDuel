@@ -1,7 +1,11 @@
 package game
 
-import drawing.*
-import game.State.*
+import drawing.BackgroundStars
+import drawing.GameDrawCanvas
+import drawing.GameHudCanvas
+import drawing.HudLabel
+import game.State.ACTIVE
+import game.State.INACTIVE
 import helper.*
 import java.awt.BorderLayout
 import java.awt.Color
@@ -31,7 +35,7 @@ class GameConnector(
         P2_FILL_COLOR,
         P2_SHIELD_COLORS
     )
-    private val playerEvents: List<GameKeyEvent> = listOf(
+    private val inGameEvents: List<GameKeyEvent> = listOf(
         GameKeyEvent(P1_NAME, P1_RIGHT, {playerOne.turningClock = true}, {playerOne.turningClock = false}),
         GameKeyEvent(P1_NAME, P1_LEFT, {playerOne.turningCounterClock = true}, {playerOne.turningCounterClock = false}),
         GameKeyEvent(P1_NAME, P1_FIRE, {playerOne.firing = true}, {playerOne.firing = false}),
@@ -44,9 +48,9 @@ class GameConnector(
     private val canvas = GameDrawCanvas(WINDOW_WIDTH, WINDOW_HEIGHT )
     private val hud = GameHudCanvas(WINDOW_WIDTH, HUD_HEIGHT)
 
-    private val moveTimerTask = MoveTimerTask()
-    private val paintTimerTask = PaintTimerTask(::collectAndRepaint)
-    private val animationTimerTask = AnimationTimerTask()
+    private val moveTimerTask = GameTimerTask()
+    private val paintTimerTask = SingleFunctionTimerTask(::collectAndRepaint)
+    private val animationTimerTask = GameTimerTask()
     private val timer = Timer()
     private var playerList = setOf(playerOne, playerTwo)
 
@@ -69,36 +73,32 @@ class GameConnector(
 
         // Create KeyListener and finish configuring frame
         keyListener.removeAllEvents()
-        keyListener.addEvents(playerEvents.toMutableList())
+        keyListener.addEvents(inGameEvents.toMutableList())
         frame.pack()
-
-        // Configure Timers TODO Delays could be removed
-        timer.scheduleAtFixedRate(paintTimerTask, 0, PAINT_TIMER_INTERVAL)
-        timer.scheduleAtFixedRate(moveTimerTask, 1000, MOVE_TIMER_INTERVAL)
-        moveTimerTask += playerOne
-        moveTimerTask += playerOne.cannon
-        moveTimerTask += playerTwo
-        moveTimerTask += playerTwo.cannon
-        moveTimerTask += backgroundStars
-        timer.scheduleAtFixedRate(animationTimerTask,0, ANIMATION_TIMER_INTERVAL)
-        animationTimerTask += playerOne.cannon::switchAnimation
-        animationTimerTask += playerTwo.cannon::switchAnimation
-        animationTimerTask += playerOne.shield::switchAnimation
-        animationTimerTask += playerTwo.shield::switchAnimation
-        // GameKeyEvents are added with delay
-        // TODO Something wrong
-        schedule(1650) {keyListener.switchEventsByName(ACTIVE, playerOne.name, playerTwo.name)}
-        //schedule(1600) {keyListener.activateEvents(playerTwo.name)}
 
         // Configure Targeting
         playerOne.cannon.getTarget = acquireTarget(playerTwo)
         playerOne.cannon.hitTarget = hitTarget(playerTwo)
         playerTwo.cannon.getTarget = acquireTarget(playerOne)
         playerTwo.cannon.hitTarget = hitTarget(playerOne)
+
+        // Configure Timers TODO Delays could be removed
+        timer.scheduleAtFixedRate(paintTimerTask, 0, PAINT_TIMER_INTERVAL)
+        timer.scheduleAtFixedRate(moveTimerTask, 1000, MOVE_TIMER_INTERVAL)
+        moveTimerTask += playerOne::move
+        moveTimerTask += playerOne.cannon::move
+        moveTimerTask += playerTwo::move
+        moveTimerTask += playerTwo.cannon::move
+        moveTimerTask += backgroundStars::move
+
+        timer.scheduleAtFixedRate(animationTimerTask,0, ANIMATION_TIMER_INTERVAL)
+        animationTimerTask += playerOne.cannon::switchAnimation
+        animationTimerTask += playerTwo.cannon::switchAnimation
+        animationTimerTask += playerOne.shield::switchAnimation
+        animationTimerTask += playerTwo.shield::switchAnimation
+        // GameKeyEvents are added with delay
+        schedule(1650) {keyListener.switchEventsByName(ACTIVE, playerOne.name, playerTwo.name)}
     }
-
-
-
 
     // Returns a function that returns the given ships center and radius
     private fun acquireTarget(ship: Ship): () -> Triple<Point, Int, String>{
@@ -115,7 +115,7 @@ class GameConnector(
     }
 
     private fun schedule(delay: Int, function: ()-> Unit){
-        timer.schedule(DelayedFunctionRunTask(function), delay.toLong())
+        timer.schedule(SingleFunctionTimerTask(function), delay.toLong())
     }
 
     private fun collectAndRepaint(){
@@ -138,7 +138,7 @@ class GameConnector(
     }
     
     private fun triggerEndAnimation(destroyedPlayerName: String, winnerName:String, explosion: Explosion){
-        animationTimerTask += { explosion.switchAnimation() }
+        animationTimerTask += explosion::switchAnimation
         keyListener.switchEventsByName(INACTIVE, destroyedPlayerName)
         schedule(1250) {endGame(Pair(destroyedPlayerName,winnerName))}
     }
@@ -168,8 +168,6 @@ class GameConnector(
         // activate loosing player / deactivate loosing player explosion status
         // reactivate controls of winning player
         schedule(650) {keyListener.switchEventsByName(ACTIVE, playerOne.name, playerTwo.name)}
-
-
 
     }
 

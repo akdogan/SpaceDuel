@@ -43,7 +43,7 @@ class Shield(private val shieldColor: List<Color>) {
 
 
 
-class LaserCannon : Movable {
+class LaserCannon {
 
     var shots: MutableList<LaserShot> = mutableListOf()
         private set
@@ -59,8 +59,8 @@ class LaserCannon : Movable {
         }
     }
     // TODO fragen: nachträglich Init ohne das die nullable sind?
-    var getTarget: (() -> Triple<Point, Int, String>)? = null
-    var hitTarget: ( () -> Unit )? = null
+    lateinit var getTarget: (() -> Triple<Point, Int, String>)
+    lateinit var hitTarget: ( () -> Unit )
 
     fun switchAnimation(){
         animationState = animationState.next()
@@ -76,20 +76,16 @@ class LaserCannon : Movable {
     }
 
 
-    override fun move() {
+    fun move() {
         shots.forEach { it.move() }
         shots.removeIf { it.outOfBounds() }
-        fun checkCollision(p1: Point, p2: Point, d: Int): Boolean{
-            return (calculateDistance(p1, p2) <= d)
-        }
-        // Gets stats of the other ship. Target is nullable, therefor checks required
-        getTarget?.invoke()?.let{ target ->
-            // Removes shot if hit; removeIf returns true on hit
-            if (shots.removeIf {
-                        checkCollision(it.pos, target.first, target.second)}
-            ){
-                hitTarget?.invoke()
-            }
+
+        // Gets stats of the other ship.
+        val target = getTarget.invoke()
+        if (shots.removeIf {
+                    calculateDistance(it.pos, target.first) <= target.second}
+        ){
+            hitTarget.invoke()
         }
         rechargeCounter++
         if (rechargeCounter >= LASER_RECHARGE_TIME){
@@ -117,7 +113,6 @@ class LaserShot(
     }
 }
 
-// TODO Work in Progress -> Animation and call of final endgame function
 class Explosion() {
     var animationCounter = 0
     var running = false

@@ -1,11 +1,10 @@
 package drawing
 
-import game.Movable
 import helper.*
 import java.awt.Point
 import kotlin.random.Random
 
-class BackgroundStars: Movable {
+class BackgroundStars {
     private val stars: MutableList<Pixel>
 
     init {
@@ -13,7 +12,7 @@ class BackgroundStars: Movable {
     }
 
 
-    override fun move() {
+    fun move() {
         stars.forEach { it.p.x -= STAR_SPEED }
         if (stars.removeIf { it.p.x <= 0 }){
             createNewStars()
